@@ -1,0 +1,73 @@
+---
+    - name: Create Folder /srv/data if not exist
+      ansible.builtin.file:
+        path: "{{ root_vol }}/data"
+        mode: '0755'
+        state: directory
+
+    - name: Create Folder /srv/checkpoints if not exist
+      ansible.builtin.file:
+        path: "{{ root_vol }}/checkpoints"
+        mode: '0755'
+        state: directory
+
+    - name: Create Folder /srv/pipeline if not exist
+      ansible.builtin.file:
+        path: "{{ root_vol }}/pipeline"
+        mode: '0755'
+        state: directory
+
+    - name: Create Folder /srv/pipeline/forests if not exist
+      ansible.builtin.file:
+        path: "{{ root_vol }}/pipeline/forests"
+        mode: '0755'
+        state: directory
+
+    - name: Install torch-scatter python package
+      ansible.builtin.pip:
+        name: torch-scatter
+        extra_args: -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
+
+    - name: Download model_weights
+      ansible.builtin.get_url:
+        url: "{{ data_url }}"
+        dest:  "{{ root_vol }}/{{ weights_path }}"
+        mode: '0644'
+
+    - name: Download example forest 
+      ansible.builtin.get_url:
+        url: "{{ example_forest_url }}"
+        dest: "{{ root_vol }}/{{ forest_data_path }}/{{ example_forest_file_name }}"
+        mode: '0644'
+
+    - name: Copy required forest
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/{{ request_forest_file_name }}"
+        dest: "{{ root_vol }}/{{ forest_data_path }}/{{ request_forest_file_name }}"
+        mode: '0644'
+
+    - name: Create requirements file
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/requirements.txt"
+        dest: "{{ root_vol }}"
+        mode: '0644'
+
+    - name: Clone a repo with separate git directory
+      ansible.builtin.git:
+        repo: "{{ tree_learn_repo }}.git"
+        dest: "{{ root_vol }}/TreeLearn"
+
+    - name: Install TreeLearn
+      ansible.builtin.pip:
+        name: "git+{{ tree_learn_repo }}"
+
+    - name: Create script file
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/tree_learn_run.py"
+        dest: "{{ root_vol }}/TreeLearn/"
+        mode: '0644'
+
+    - name: Install specified python requirements
+      ansible.builtin.pip:
+        requirements: "{{ root_vol }}/requirements.txt"
+

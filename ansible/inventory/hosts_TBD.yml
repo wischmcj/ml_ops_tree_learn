@@ -1,0 +1,14 @@
+all:
+  children:
+    observer:
+      hosts:
+        metrics-server:
+          ansible_host: {{ prometheus_drop_ip }}
+    target:
+      hosts:
+        metrics-server:
+          ansible_host: {{prometheus_drop_ip}}
+        target-node-1:
+          ansible_host: {{}}
+        target-node-2:
+          ansible_host: {{}}

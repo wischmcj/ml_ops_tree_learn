@@ -35,3 +35,12 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+ansible/local_ansible.cfg
+ansible/playbooks/roles/tree_learner/files/collective.npy
+
+#lidar scans and such
+*.npy
+*.npz
+*.laz
+*.las
+*.pcd
