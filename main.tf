@@ -11,8 +11,6 @@ resource "digitalocean_droplet" "tree_learner" {
   name   = "${var.instance_name_prefix}-treelearn"
   region = "${var.do_region}"
   size   = "${var.do_host_type}"
-  # ssh_keys = "${split(",", var.do_ssh_keys)}"
-  # ssh_keys = [data.digitalocean_ssh_key.example.id]
   ssh_keys = [
     data.digitalocean_ssh_key.example.id
   ]
@@ -31,37 +29,6 @@ resource "digitalocean_droplet" "tree_learner" {
       "while sudo lsof /var/lib/dpkg/lock-frontend; do echo 'Waiting for apt to finish...'; sleep 5; done"
     ]
   }
-
-  # provisioner "file" {
-  #   content = templatefile("env",
-  #   {
-  #       downloader = "${var.warrior_downloader}"
-  #       project = "${var.warrior_project}"
-  #       username = "${var.warrior_username}"
-  #       password = "${var.warrior_password}"
-  #       concurrency = "${var.warrior_concurrency}"
-  #   })
-  #   destination = "/tmp/env"
-  # }
-  # provisioner "file" {
-  #   # content = file("loop_and_log.sh")
-  #   content = templatefile("start.sh",
-  #   {
-  #     warriors = "${var.warriors_per_host}"
-  #   })
-  #   destination = "/tmp/start.sh"
-  # # }
-  # provisioner "remote-exec" {
-  #   # Stops container named exporter if running 
-  #   # Starts instance of node-exporter, which monitors 
-  #   #  the warrior container, returning metrics to prometheus
-  #   inline = [
-  #     # "docker stop exporter && docker rm exporter || true",
-  #     # "docker run -d --name exporter --net=host --pid=host -v '/:/host:ro,rslave'  prom/node-exporter --path.rootfs /host",
-  #     "chmod +x /tmp/start.sh",
-  #     "/tmp/start.sh",
-  #   ]
-  # }
 }
 
 resource "digitalocean_volume_attachment" "tlvol_attache" {
@@ -75,7 +42,13 @@ resource "null_resource" "basic_init"{
   depends_on = [digitalocean_droplet.tree_learner]
   count  = "${var.do_observers}"
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u root -i '${element(digitalocean_droplet.tree_learner.*.ipv4_address, count.index)},'  --private-key ${var.do_pvt_key} -e 'pub_key=${var.do_pub_key}' ansible/playbooks/apt_setup.yml"
+    command = join(" ", ["ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook",
+                          "-u root",
+                          "-i '${element(digitalocean_droplet.tree_learner.*.ipv4_address, count.index)},'", 
+                          "--private-key ${var.do_pvt_key}",
+                          "-e 'pub_key=${var.do_pub_key}'",
+                          "ansible/playbooks/apt_setup.yml"
+                          ])
   }
 }
 
@@ -83,14 +56,14 @@ resource "null_resource" "tree_learner_init"{
   depends_on = [null_resource.basic_init] 
   count  = "${var.do_observers}"
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u root -i '${element(digitalocean_droplet.tree_learner.*.ipv4_address, count.index)},'  --private-key ${var.do_pvt_key} ansible/playbooks/tree_learner.yml"
+    command = join(" ", ["ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook",
+                          "-u root",
+                          "-i '${element(digitalocean_droplet.tree_learner.*.ipv4_address, count.index)},'", 
+                          "--private-key ${var.do_pvt_key}",
+                          # "-e forest_file_name=${var.forest_file_name}",
+                          "ansible/playbooks/tree_learner.yml",
+                          "--extra-vars '@inputs.tfvars.json'"
+                          ])
   }
 }
 
-# resource "null_resource" "prometheus_setup_as_target"{
-#   depends_on = [null_resource.warrior]
-#   count  = "${var.do_observers}"
-#   provisioner "local-exec" {
-#     command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u root -i '${element(digitalocean_droplet.prometheus.*.ipv4_address, count.index)},' --private-key ${var.do_pvt_key} -e 'pub_key=${var.do_pub_key}' ansible/playbooks/target_nodes.yml"
-#   }
-# }
