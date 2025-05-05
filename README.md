@@ -1,3 +1,9 @@
+# connect to do notes 
+cp /media/penguaman/code/code/CodesAndSuch/digital_ocean/* ~/.ssh/
+╭─penguaman at penguaputer in /media/penguaman/code/code/ActualCode/ml_ops_tree_learn on main✘✘✘ 25-05-04 - 15:16:55
+╰─⠠⠵ ssh-add ~/.ssh/id_rsa_digitalocean
+
+
 # ml_ops_tree_learn
 IaC code for creating a gpu droplet in Digital Ocean, running TreeLearn's pre-weighted UNet and exporting the data back to a local location
 
@@ -6,54 +12,58 @@ IaC code for creating a gpu droplet in Digital Ocean, running TreeLearn's pre-we
 
 ## Practical Guide 
 Just fill out the needed values in inputs.tfvars. This file should be passed when the process is called, as shown below:
-`tofu plan -var-file=inputs.tfvars `
-`tofu apply -var-file=inputs.tfvars `
+  ```bash
+    tofu plan -var-file=inputs.tfvars 
+    tofu apply -var-file=inputs.tfvars
+   ```
+
 The variables will then flow through to the [pipeline configuration file](ansible/playbooks/roles/tree_learner/templates/pipeline.yaml)[(see docs)](https://github.com/ecker-lab/TreeLearn/blob/main/docs/segmentation_pipeline.md#explanation-of-some-args-for-running-the-pipeline), informing the run of the model
 
+High level, the variables are used to define:
 
+    - DigitalOcean connection data and data storage options
+    - Model inputs (including data preparation settings, initial weights, input data)
+    - Outpur directory structure
 
-## Details 
+## Files 
 
 The following variable files exist: 
 
-- `inputs.tfvars`: Where the user changes variables 
+- `inputs.tfvars.json`: Where the user changes variables 
   - Main variable definitions file that is passed to OpenTofu via the CLI 
-- `inputs.tf`: Defines which variables can be passed in inputs.tfvars for OpenTofu
-  - Variable declarations and type definitions that specify the expected format and structure of input variables
+- `inputs.tf`: 
+  - Defines which variables can be passed in inputs.tfvars and, by extension, the pipeline.
 - `ansible/playbooks/roles/tree_learner/vars/main.yml`: 
-  - Defines which variables can be passed to the tree_learner ansible role from terraform
+  - Defines available variables and sensible defaults for the ansible role
 - `ansible/playbooks/roles/tree_learner/templates/pipeline.yaml`: 
-  - Pipeline configuration template that receives variables to set model parameters and processing options
+  - Pipeline configuration template; populated with the user input model parameters and processing options 
 
+## Process
 
 The flow of variables from user input through to the pipeline proceeds as follows
 
-1. User provides variables via command line when running tofu:
-   ```bash
-   tofu apply -var-file="inputs.tfvars"
-   ```
-
-2. Variables are declared and typed in inputs.tf:
-   - Digital Ocean settings (token, keys, region etc)
-   - Pipeline configuration (file paths, volumes)
-   - Droplet configuration (instance names, images)
-
-3. Values are defined in inputs.tfvars:
-   - Credentials and access tokens
-   - Local machine details (IP, user, data directory)
-   - Forest data configuration (file name, paths)
-
-4. Variables are passed to ansible playbooks in main.tf:
+1. User updates variables as desired in inputs.tfvars.json
+2. User provides variables via command line when running either:
+   1. OpenTofu:
+        ```bash
+        tofu apply -var-file=inputs.tfvars.json
+        ```
+   3. Ansible
+        ```bash
+        tofu apply -var-file=inputs.tfvars.json
+        ```
+    w
+3. Variables are passed to ansible playbooks in main.tf:
    ```hcl
    -e 'forest_file_name=${var.forest_file_name}'
    ```
 
-5. Ansible roles (tree_learner) receive variables in vars/main.yml:
+4. Ansible roles (tree_learner) receive variables in vars/main.yml:
    - Sets paths for weights, data, repositories
    - Configures forest data locations
    - Sets root volume and local machine details
 
-6. Final pipeline configuration in pipeline.yaml:
+5. Final pipeline configuration in pipeline.yaml:
    - Variables templated into YAML structure
    - Sets model parameters, data paths
    - Configures processing pipeline with received variables
