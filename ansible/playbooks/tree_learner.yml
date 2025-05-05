@@ -5,17 +5,17 @@
   become_method: sudo
   roles:
    - role: tree_learner
-      vars:
-        forest_data_path: {{ forest_data_path }}
-        forest_file_name: {{ forest_file_name }}
-        local_ip: {{ local_ip }}
-        local_user: {{ local_user }}
-        local_data_dir: {{ local_data_dir }}
-        save_format: {{ save_format }}
-        # dataset_test.data_root: "/srv/pipeline/tiles"
-        # tile_generation: True
-        # pretrain: "/content/checkpoints/model_weights.pth"
-        # sample_generation.stride: 0.9 # small overlap of tiles
-        # shape_cfg.outer_remove: False # default value: 13.5
-        # save_cfg.save_treewise: True
-        # save_cfg.return_type: "voxelized_and_filtered"
+     vars:
+      forest_data_path: "{{ forest_data_path }}"
+      forest_file_name: "{{ forest_file_name }}"
+      local_ip: "{{ local_ip }}"
+      local_user: "{{ local_user }}"
+      local_data_dir: "{{ local_data_dir }}"
+      save_format: "{{ save_format }}"
+      # dataset_test.data_root: "/srv/pipeline/tiles"
+      # tile_generation: True
+      # pretrain: "/content/checkpoints/model_weights.pth"
+      # sample_generation.stride: 0.9 # small overlap of tiles
+      # shape_cfg.outer_remove: False # default value: 13.5
+      # save_cfg.save_treewise: True
+      # save_cfg.return_type: "voxelized_and_filtered"

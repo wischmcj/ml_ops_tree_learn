@@ -2,12 +2,14 @@
 variable "do_token" {}
 variable "do_pvt_key" {}
 variable "do_pub_key" {}
-variable "do_ssh_keys" {}
-variable "do_hosts" {}
-variable "do_observers" {}
 variable "do_region" {}
 variable "do_host_type" {}
-variable "do_key_password" {}
+variable "volume_id" {
+  default = ""
+}
+variable "volume_snapshot_id" {
+  default = ""
+}
 
 # Pipeline Configuration
 variable "forest_file_name" {}
@@ -18,6 +20,7 @@ variable "local_ip" {}
 variable "local_user" {}
 variable "local_data_dir" {}
 variable "save_format" {}
+variable "config_path" {}
 
 # Droplet Configuration
 variable "instance_name_prefix" {

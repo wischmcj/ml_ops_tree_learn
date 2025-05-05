@@ -9,7 +9,7 @@ model:
 ############ non-default args
 # forest_path: 'data/pipeline/L1W/forest/L1W.laz' # path to forest point cloud to be segmented (las, npy, npz or txt)
 forest_path: "{{ root_vol }}/{{ forest_data_path }}/{{ forest_file_name }}"
-pretrain: "{{ root_dir }}/{{ weights_path }}" # path to trained network parameters for offset and semantic prediction
+pretrain: "{{ root_vol }}/{{ weights_path }}" # path to trained network parameters for offset and semantic prediction
 fp16: True # using half precision for network prediction
 tile_generation: True # whether to generate tiles for the forest point cloud to be segmented. If you re-run the pipeline multiple times for the same point cloud, this can be set to False after the first time.
 
@@ -29,7 +29,7 @@ save_cfg:
   save_treewise: True # additionally save predicted trees individually as las files
   save_pointwise: True # additionally save pointwise results as numpy arrays (offset predictions, semantic predictions, etc.)
   return_type: 'voxelized_and_filtered' # returns predictions on either the "voxelized_and_filtered", "voxelized" or "original" point cloud. Takes a bit longer if "original" is selected since predictions must be propagated to original input points.
-  results_dir: {{ results_dir }} # name of directory where results are saved
+  results_dir: "{{ root_vol }}/pipeline/results" # name of directory where results are saved
   outer_remove: False
 
 

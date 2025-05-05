@@ -40,16 +40,24 @@
     #     dest: "{{ root_vol }}/{{ forest_data_path }}/{{ example_forest_file_name }}"
     #     mode: '0644'
 
-    - name: Copy required forest
-      ansible.builtin.copy:
-        src: "{{ local_data_dir }}/{{ forest_file_name }}"
-        dest: "{{ root_vol }}/{{ forest_data_path }}/{{ forest_file_name }}"
-        mode: '0644'
+    - name: Get stats for the specified forest file
+      ansible.builtin.stat:
+        path: "{{ root_vol }}/{{ forest_data_path }}/{{ forest_file_name }}"
+      register: p
+    - name: check if the file exists
+      ansible.builtin.debug:
+        msg: "Path exists and is a directory"
+      when: p.stat.
+    # - name: Copy required forest
+    #   ansible.builtin.copy:
+    #     src: "{{ local_data_dir }}/{{ forest_file_name }}"
+    #     dest: "{{ root_vol }}/{{ forest_data_path }}/{{ forest_file_name }}"
+    #     mode: '0644'
 
-    - name: Clone a repo with separate git directory
-      ansible.builtin.git:
-        repo: "{{ tree_learn_repo }}.git"
-        dest: "{{ root_vol }}/TreeLearn"
+    # - name: Clone a repo with separate git directory
+    #   ansible.builtin.git:
+    #     repo: "{{ tree_learn_repo }}.git"
+    #     dest: "{{ root_vol }}/TreeLearn"
 
     - name: Create requirements file
       ansible.builtin.copy:
@@ -60,7 +68,7 @@
     - name: Create config file
       ansible.builtin.template:
         src: "{{ role_path }}/templates/pipeline.yaml"
-        dest: "{{ root_vol }}/pipeline/pipeline.yaml"
+        dest: "{{ root_vol }}/pipeline/tree_learner_config.yaml"
         mode: '0644'
 
     - name: Install TreeLearn

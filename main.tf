@@ -1,9 +1,15 @@
+#### Volume will remain in digital ocean to avoid having to upload
+####  large files each run 
+
 resource "digitalocean_volume" "tlvol" {
   region = "${var.do_region}"
   name                    = "tlvol"
   size                    = 100
   initial_filesystem_type = "ext4"
   description             = "main volume for persisting data "
+  # snapshot_id           = var.volume_snapshot_id == "" ? null : var.app_id
+  # volume_id             = var.volume_snapshot_id == "" ? null : var.app_id
+
 }
 
 resource "digitalocean_droplet" "tree_learner" {
@@ -33,7 +39,8 @@ resource "digitalocean_droplet" "tree_learner" {
 
 resource "digitalocean_volume_attachment" "tlvol_attache" {
   droplet_id = digitalocean_droplet.tree_learner.id
-  volume_id  = digitalocean_volume.tlvol.id
+  volume_id = var.volume_id
+  # volume_id  = digitalocean_volume.tlvol.id
 }
 
 # Init scripts install docker and the digital ocean agent
