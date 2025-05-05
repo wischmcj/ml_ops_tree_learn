@@ -4,10 +4,16 @@ import argparse
 import pickle
 import pprint
 import shutil
+## Needed for hull fix
+import pandas as pd
+from alphashape import alphashape
+from shapely.geometry import Polygon
+import geopandas
+
 from tree_learn.dataset import TreeDataset
 from tree_learn.model import TreeLearn
 from tree_learn.util import (munch_to_dict, build_dataloader, get_root_logger, load_checkpoint, ensemble, 
-                             get_coords_within_shape, get_hull_buffer, get_hull, get_cluster_means,
+                             get_coords_within_shape, get_cluster_means,
                              propagate_preds, save_treewise, load_data, save_data, make_labels_consecutive, 
                              get_config, generate_tiles, assign_remaining_points_nearest_neighbor,
                              get_pointwise_preds, get_instances, propagate_preds_hash_full, propagate_preds_hash_vox)
@@ -17,7 +23,55 @@ NON_TREES_LABEL_IN_GROUPING = 0
 NOT_ASSIGNED_LABEL_IN_GROUPING = -1
 START_NUM_PREDS = 1
 
+# get a coarser grid of all xy points to calculate the hull
+def grid_points(coords, grid_size):
+    # Create a DataFrame from coordinates
+    df = pd.DataFrame(coords, columns=['x', 'y'])
+    
+    # Assign each point to a grid cell by dividing coordinates by grid_size and flooring
+    df['grid_x'] = (df['x'] // grid_size).astype(int)
+    df['grid_y'] = (df['y'] // grid_size).astype(int)
+    
+    # Keep only one point per grid cell (e.g., the first occurrence)
+    reduced_df = df.drop_duplicates(subset=['grid_x', 'grid_y'])
+    
+    # Return the reduced set of points as a numpy array
+    return reduced_df[['x', 'y']].to_numpy()
 
+def shift_hull(hull_polygon, shift):
+    if not isinstance(hull_polygon, Polygon): #, "failed to calculate concave hull. Set alpha=0 to use convex hull or set outer_remove=~"
+        hull_polygon = hull_polygon.geoms[np.argmax([geom.area for geom in hull_polygon.geoms])]
+    vertices = np.array(hull_polygon.exterior.coords)
+    modified_vertices = vertices + shift
+    hull_polygon = Polygon(modified_vertices)
+    return hull_polygon
+
+# get hull
+def get_hull(coords, alpha, shift = False):
+    # create 2-dimensional hull of forest xy-coordinates
+    coords_mean = np.mean(coords, axis=0, dtype=np.float64)
+    coords = grid_points(coords - coords_mean, grid_size=0.25)
+
+    hull_polygon = alphashape.alphashape(coords, alpha)
+    hull_polygon = shift_hull(hull_polygon, coords_mean)
+    hull_polygon_geoseries = geopandas.GeoSeries(hull_polygon)
+    hull_polygon_geodf = geopandas.GeoDataFrame(geometry=hull_polygon_geoseries)
+    return hull_polygon ,hull_polygon_geodf
+
+# get buffer around hull
+def get_hull_buffer(coords, alpha, buffersize):
+    # create 2-dimensional hull of forest xy-coordinates
+    coords_mean = np.mean(coords, axis=0, dtype=np.float64)
+    coords = grid_points(coords - coords_mean, grid_size=0.25)
+    
+    # create 2-dimensional hull of forest xy-coordinates and from this create hull buffer
+    hull_polygon = alphashape.alphashape(coords, alpha)
+    hull_polygon = shift_hull(hull_polygon, coords_mean)
+    hull_line = hull_polygon.boundary
+    hull_line_geoseries = geopandas.GeoSeries(hull_line)
+    hull_buffer = hull_line_geoseries.buffer(buffersize)
+    hull_buffer_geodf = geopandas.GeoDataFrame(geometry=hull_buffer)
+    return hull_buffer_geodf
 
 def run_treelearn_pipeline(config, config_path=None, start_at='start'):
     # make dirs
