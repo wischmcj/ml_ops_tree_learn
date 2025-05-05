@@ -12,7 +12,7 @@ resource "digitalocean_volume" "tlvol" {
 }
 
 resource "digitalocean_droplet" "tree_learner" {
-  image  = "${var.droplet_image}"
+  image  = var.droplet_snapshot_id == "" ?  "${var.droplet_image}": var.droplet_snapshot_id
   name   = "${var.instance_name_prefix}-treelearn"
   region = "${var.do_region}"
   size   = "${var.do_host_type}"

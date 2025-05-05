@@ -10,6 +10,7 @@ local_ip: "192.168.0.105"
 local_user: "penguaman"
 local_data_dir: "data"
 return_type: "original"
+start_at: "start"
 # forest_path: "data/psa_collective.npy"
 # dataset_test.data_root: "/srv/pipeline/tiles"
 # tile_generation: True

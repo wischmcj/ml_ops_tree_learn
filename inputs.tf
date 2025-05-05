@@ -10,6 +10,9 @@ variable "volume_id" {
 variable "volume_snapshot_id" {
   default = ""
 }
+variable "droplet_snapshot_id" {
+  default = ""
+}
 
 # Pipeline Configuration
 variable "forest_file_name" {}
@@ -22,6 +25,12 @@ variable "local_data_dir" {}
 variable "save_format" {}
 variable "return_type" {}
 variable "config_path" {}
+variable "start_at" {}
+
+# TreeLearn Configuration
+variable "data_url" {}
+variable "tree_learn_repo" {}
+variable "example_forest_url" {}
 
 # Droplet Configuration
 variable "instance_name_prefix" {

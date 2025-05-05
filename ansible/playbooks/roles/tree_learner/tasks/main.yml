@@ -14,28 +14,28 @@
       become: true
       ansible.builtin.shell: echo '/dev/disk/by-id/scsi-0DO_Volume_tlvol /mnt/tlvol ext4 defaults,nofail,discard 0 0' | sudo tee -a /etc/fstab
 
-    - name: Create Folder /srv/checkpoints if not exist
-      ansible.builtin.file:
-        path: "{{ root_vol }}/checkpoints"
-        mode: '0755'
-        state: directory
+    # - name: Create Folder /srv/checkpoints if not exist
+    #   ansible.builtin.file:
+    #     path: "{{ root_vol }}/checkpoints"
+    #     mode: '0755'
+    #     state: directory
 
-    - name: Create Folder /srv/pipeline if not exist
-      ansible.builtin.file:
-        path: "{{ root_vol }}/pipeline"
-        mode: '0755'
-        state: directory
+    # - name: Create Folder /srv/pipeline if not exist
+    #   ansible.builtin.file:
+    #     path: "{{ root_vol }}/pipeline"
+    #     mode: '0755'
+    #     state: directory
 
-    - name: Create Folder /srv/pipeline/forests if not exist
-      ansible.builtin.file:
-        path: "{{ root_vol }}/pipeline/forests"
-        mode: '0755'
-        state: directory
+    # - name: Create Folder /srv/pipeline/forests if not exist
+    #   ansible.builtin.file:
+    #     path: "{{ root_vol }}/pipeline/forests"
+    #     mode: '0755'
+    #     state: directory
 
-    # - name: Install torch-scatter python package
-    #   ansible.builtin.pip:
-    #     name: torch-scatter
-    #     extra_args: -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
+    - name: Install torch-scatter python package
+      ansible.builtin.pip:
+        name: torch-scatter
+        extra_args: -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
 
     # - name: Download model_weights
     #   ansible.builtin.get_url:
@@ -82,24 +82,25 @@
         dest: "{{ root_vol }}/pipeline/tree_learner_config.yaml"
         mode: '0644'
 
-    # - name: Install TreeLearn
-    #   ansible.builtin.pip:
-    #     name: "git+{{ tree_learn_repo }}"
-
-    # - name: Install specified python requirements
-    #   ansible.builtin.pip:
-    #     requirements: "{{ root_vol }}/requirements.txt"
-
-    - name: Create script file
-      ansible.builtin.copy:
-        src: "{{ role_path }}/files/run_pipeline.py"
-        dest: "{{ root_vol }}/TreeLearn/"
-        mode: '0644'
-
     - name: Overwrite TreeLearn/tools/pipeline.py
       ansible.builtin.copy:
         src: "{{ role_path }}/files/pipeline.py"
-        dest: "{{ root_vol }}/TreeLearn/tools/pipeline.py"
+        dest: "{{ root_vol }}/TreeLearn/tools/pipeline/pipeline.py"
         mode: '0644'
         follow: yes
+
+    - name: Install TreeLearn
+      ansible.builtin.pip:
+        name: "git+{{ tree_learn_repo }}"
+
+    - name: Install specified python requirements
+      ansible.builtin.pip:
+        requirements: "{{ root_vol }}/requirements.txt"
+
+    - name: Create script file
+      ansible.builtin.template:
+        src: "{{ role_path }}/templates/run_pipeline.py"
+        dest: "{{ root_vol }}/TreeLearn/"
+        mode: '0644'
+
 

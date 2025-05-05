@@ -1,9 +1,3 @@
-# connect to do notes 
-cp /media/penguaman/code/code/CodesAndSuch/digital_ocean/* ~/.ssh/
-╭─penguaman at penguaputer in /media/penguaman/code/code/ActualCode/ml_ops_tree_learn on main✘✘✘ 25-05-04 - 15:16:55
-╰─⠠⠵ ssh-add ~/.ssh/id_rsa_digitalocean
-
-
 # ml_ops_tree_learn
 IaC code for creating a gpu droplet in Digital Ocean, running TreeLearn's pre-weighted UNet and exporting the data back to a local location
 
@@ -44,15 +38,15 @@ The flow of variables from user input through to the pipeline proceeds as follow
 
 1. User updates variables as desired in inputs.tfvars.json
 2. User provides variables via command line when running either:
-   1. OpenTofu:
+   a. OpenTofu:
         ```bash
         tofu apply -var-file=inputs.tfvars.json
         ```
-   3. Ansible
+   b. Ansible
         ```bash
         tofu apply -var-file=inputs.tfvars.json
         ```
-    w
+
 3. Variables are passed to ansible playbooks in main.tf:
    ```hcl
    -e 'forest_file_name=${var.forest_file_name}'
@@ -63,7 +57,17 @@ The flow of variables from user input through to the pipeline proceeds as follow
    - Configures forest data locations
    - Sets root volume and local machine details
 
-5. Final pipeline configuration in pipeline.yaml:
+5. Final pipeline configuration, pipeline.yaml, is populated by ansible pipeline:
    - Variables templated into YAML structure
    - Sets model parameters, data paths
    - Configures processing pipeline with received variables
+
+
+
+# High level options 
+data url for small_tree
+// "data_url": "https://data.goettingen-research-online.de/file.xhtml?persistentId=doi:10.25625/VPMPID/TYZJ4E&version=7.0"
+finetuned weights 
+// "data_url": "https://data.goettingen-research-online.de/file.xhtml?persistentId=doi:10.25625/VPMPID/8CIIW0&version=7.0"
+diverse training weights 
+// "data_url": "https://data.goettingen-research-online.de/file.xhtml?persistentId=doi:10.25625/VPMPID/C1AHQW&version=7.0"

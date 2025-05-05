@@ -112,13 +112,14 @@ def run_treelearn_pipeline(config, config_path=None, start_at='start'):
     if config_path is not None:
         shutil.copy(config_path, os.path.join(documentation_dir, os.path.basename(config_path)))
 
-    if start_at == 'tiles':
+    config.dataset_test.data_root = os.path.join(tiles_dir, 'npz')
+    if start_at == 'tiles' or started==True:
         started=True
         # generate tiles used for inference and specify path to it in dataset config
-        config.dataset_test.data_root = os.path.join(tiles_dir, 'npz')
         if config.tile_generation:
             logger.info('#################### generating tiles ####################')
             generate_tiles(config.sample_generation, config.forest_path, logger, config.save_cfg.return_type)
+
 
     if start_at == 'pw_preds' or started==True:
         started=True

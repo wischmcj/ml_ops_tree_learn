@@ -2,8 +2,8 @@
 import sys
 import pprint
 import logging
-# sys.path.append(f"tools/pipeline")
-from tree_learn.tools.pipeline import run_treelearn_pipeline
+sys.path.append(f"tools/pipeline")
+from pipeline import run_treelearn_pipeline
 from tree_learn.util import get_config
 from tree_learn.util.logger import get_root_logger
 
@@ -28,5 +28,5 @@ print(pprint.pformat(config.toDict(), indent=2))
 
 # run pipeline
 logger.info('running pipeline')
-run_treelearn_pipeline(config)
+run_treelearn_pipeline(config, start_at="{{ start_at }}")
 logger.info('pipeline finished')
