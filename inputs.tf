@@ -20,6 +20,7 @@ variable "local_ip" {}
 variable "local_user" {}
 variable "local_data_dir" {}
 variable "save_format" {}
+variable "return_type" {}
 variable "config_path" {}
 
 # Droplet Configuration

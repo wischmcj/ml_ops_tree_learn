@@ -7,7 +7,6 @@ model:
   spatial_shape: [500, 500, 1000] # just a technicality, leave unchanged to avoid zero size error. Does not have actual impact on prediction.
 
 ############ non-default args
-# forest_path: 'data/pipeline/L1W/forest/L1W.laz' # path to forest point cloud to be segmented (las, npy, npz or txt)
 forest_path: "{{ root_vol }}/{{ forest_data_path }}/{{ forest_file_name }}"
 pretrain: "{{ root_vol }}/{{ weights_path }}" # path to trained network parameters for offset and semantic prediction
 fp16: True # using half precision for network prediction
@@ -28,7 +27,7 @@ save_cfg:
   save_formats: [{{ save_format }}] # save formats for predicted forest (laz, las, npz, npy or txt)
   save_treewise: True # additionally save predicted trees individually as las files
   save_pointwise: True # additionally save pointwise results as numpy arrays (offset predictions, semantic predictions, etc.)
-  return_type: 'voxelized_and_filtered' # returns predictions on either the "voxelized_and_filtered", "voxelized" or "original" point cloud. Takes a bit longer if "original" is selected since predictions must be propagated to original input points.
+  return_type: {{ return_type }} # returns predictions on either the "voxelized_and_filtered", "voxelized" or "original" point cloud. Takes a bit longer if "original" is selected since predictions must be propagated to original input points.
   results_dir: "{{ root_vol }}/pipeline/results" # name of directory where results are saved
   outer_remove: False
 

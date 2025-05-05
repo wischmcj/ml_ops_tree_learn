@@ -1,9 +1,18 @@
 ---
-    - name: Create Folder /srv/data if not exist
+
+    - name: Create Folder for volume mount
       ansible.builtin.file:
-        path: "{{ root_vol }}/data"
+        path: "{{ root_vol }}"
         mode: '0755'
         state: directory
+
+    - name: Mount volume
+      become: true
+      ansible.builtin.shell: mount -o discard,defaults,noatime /dev/disk/by-id/scsi-0DO_Volume_tlvol /mnt/tlvol
+
+    - name: Change fstab so the volume will be mounted after a reboot
+      become: true
+      ansible.builtin.shell: echo '/dev/disk/by-id/scsi-0DO_Volume_tlvol /mnt/tlvol ext4 defaults,nofail,discard 0 0' | sudo tee -a /etc/fstab
 
     - name: Create Folder /srv/checkpoints if not exist
       ansible.builtin.file:
@@ -23,16 +32,16 @@
         mode: '0755'
         state: directory
 
-    - name: Install torch-scatter python package
-      ansible.builtin.pip:
-        name: torch-scatter
-        extra_args: -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
+    # - name: Install torch-scatter python package
+    #   ansible.builtin.pip:
+    #     name: torch-scatter
+    #     extra_args: -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
 
-    - name: Download model_weights
-      ansible.builtin.get_url:
-        url: "{{ data_url }}"
-        dest:  "{{ root_vol }}/{{ weights_path }}"
-        mode: '0644'
+    # - name: Download model_weights
+    #   ansible.builtin.get_url:
+    #     url: "{{ data_url }}"
+    #     dest:  "{{ root_vol }}/{{ weights_path }}"
+    #     mode: '0644'
 
     # - name: Download example forest 
     #   ansible.builtin.get_url:
@@ -40,14 +49,16 @@
     #     dest: "{{ root_vol }}/{{ forest_data_path }}/{{ example_forest_file_name }}"
     #     mode: '0644'
 
-    - name: Get stats for the specified forest file
-      ansible.builtin.stat:
-        path: "{{ root_vol }}/{{ forest_data_path }}/{{ forest_file_name }}"
-      register: p
-    - name: check if the file exists
-      ansible.builtin.debug:
-        msg: "Path exists and is a directory"
-      when: p.stat.
+    # - name: Get stats for the specified forest file
+    #   ansible.builtin.stat:
+    #     path: "{{ root_vol }}/{{ forest_data_path }}/{{ forest_file_name }}"
+    #   register: p
+
+    # - name: check if the file exists
+    #   ansible.builtin.debug:
+    #     msg: "Path exists and is a directory"
+    #   when: p.stat.
+
     # - name: Copy required forest
     #   ansible.builtin.copy:
     #     src: "{{ local_data_dir }}/{{ forest_file_name }}"
@@ -71,17 +82,24 @@
         dest: "{{ root_vol }}/pipeline/tree_learner_config.yaml"
         mode: '0644'
 
-    - name: Install TreeLearn
-      ansible.builtin.pip:
-        name: "git+{{ tree_learn_repo }}"
+    # - name: Install TreeLearn
+    #   ansible.builtin.pip:
+    #     name: "git+{{ tree_learn_repo }}"
 
-    - name: Install specified python requirements
-      ansible.builtin.pip:
-        requirements: "{{ root_vol }}/requirements.txt"
+    # - name: Install specified python requirements
+    #   ansible.builtin.pip:
+    #     requirements: "{{ root_vol }}/requirements.txt"
 
     - name: Create script file
       ansible.builtin.copy:
         src: "{{ role_path }}/files/run_pipeline.py"
         dest: "{{ root_vol }}/TreeLearn/"
         mode: '0644'
+
+    - name: Overwrite TreeLearn/tools/pipeline.py
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/pipeline.py"
+        dest: "{{ root_vol }}/TreeLearn/tools/pipeline.py"
+        mode: '0644'
+        follow: yes
 

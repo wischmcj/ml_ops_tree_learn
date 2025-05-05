@@ -6,10 +6,9 @@ resource "digitalocean_volume" "tlvol" {
   name                    = "tlvol"
   size                    = 100
   initial_filesystem_type = "ext4"
-  description             = "main volume for persisting data "
-  # snapshot_id           = var.volume_snapshot_id == "" ? null : var.app_id
-  # volume_id             = var.volume_snapshot_id == "" ? null : var.app_id
-
+  description             = "main volume for persisting data"
+  snapshot_id           = var.volume_snapshot_id == "" ? null : var.volume_snapshot_id
+  # volume_id             = var.volume_id == "" ? null : var.volume_id
 }
 
 resource "digitalocean_droplet" "tree_learner" {
@@ -39,15 +38,14 @@ resource "digitalocean_droplet" "tree_learner" {
 
 resource "digitalocean_volume_attachment" "tlvol_attache" {
   droplet_id = digitalocean_droplet.tree_learner.id
-  volume_id = var.volume_id
-  # volume_id  = digitalocean_volume.tlvol.id
+  volume_id  = var.volume_id == "" ? digitalocean_volume.tlvol.id : var.volume_id
 }
 
 # Init scripts install docker and the digital ocean agent
 #     the latter sends exe metrics (cpu, bandwidth, etc) to DO
 resource "null_resource" "basic_init"{
-  depends_on = [digitalocean_droplet.tree_learner]
-  count  = "${var.do_observers}"
+  depends_on = [digitalocean_droplet.tree_learner, digitalocean_volume_attachment.tlvol_attache]
+  count  = 1
   provisioner "local-exec" {
     command = join(" ", ["ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook",
                           "-u root",
@@ -61,7 +59,7 @@ resource "null_resource" "basic_init"{
 
 resource "null_resource" "tree_learner_init"{
   depends_on = [null_resource.basic_init] 
-  count  = "${var.do_observers}"
+  count  = 1
   provisioner "local-exec" {
     command = join(" ", ["ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook",
                           "-u root",
