@@ -1,0 +1,27 @@
+{ 
+  "do_pvt_key": "<path_to_your_private_key>/id_rsa_digitalocean",
+  "do_region": "nyc2",
+  "do_host_type": "gpu-h100x1-80gb",
+  "droplet_image": "gpu-h100x1-base",
+  
+  "droplet_snapshot_id": "",
+  "volume_id": "",
+  "volume_snapshot_id": "",
+  "local_ip": "",
+  "local_user": "",
+
+  "local_data_dir": "/media/penguaman/5e27cc6f-292a-4199-b844-50e1ebbe21d7/",
+  "root_vol": "/mnt/tlvol",
+  "config_path": "pipeline/tree_learner_config.yaml",
+  "weights_path": "checkpoints/model_weights.pth",
+  "save_format": "'las'",
+  "return_type": "'original'",
+
+  "forest_data_path": "pipeline/forests/",
+  "forest_file_name": "WoodRockyRiver1.las",
+  "start_at": "start",
+
+  "weights_url": "https://data.goettingen-research-online.de/api/access/datafile/:persistentId?persistentId=doi:10.25625/VPMPID/1JMEQV",
+  "tree_learn_repo": "https://github.com/ecker-lab/TreeLearn",
+  "example_forest_url": "https://data.goettingen-research-online.de/api/access/datafile/:persistentId?persistentId=doi:10.25625/VPMPID/0WDXL6"
+}
