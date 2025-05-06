@@ -51,7 +51,6 @@ resource "null_resource" "basic_init"{
                           "-u root",
                           "-i '${element(digitalocean_droplet.tree_learner.*.ipv4_address, count.index)},'", 
                           "--private-key ${var.do_pvt_key}",
-                          "-e 'pub_key=${var.do_pub_key}'",
                           "ansible/playbooks/apt_setup.yml"
                           ])
   }

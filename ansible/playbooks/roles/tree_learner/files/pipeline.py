@@ -6,7 +6,7 @@ import pprint
 import shutil
 ## Needed for hull fix
 import pandas as pd
-from alphashape import alphashape
+import alphashape
 from shapely.geometry import Polygon
 import geopandas
 
@@ -56,7 +56,7 @@ def get_hull(coords, alpha, shift = False):
     hull_polygon = shift_hull(hull_polygon, coords_mean)
     hull_polygon_geoseries = geopandas.GeoSeries(hull_polygon)
     hull_polygon_geodf = geopandas.GeoDataFrame(geometry=hull_polygon_geoseries)
-    return hull_polygon ,hull_polygon_geodf
+    return hull_polygon_geodf
 
 # get buffer around hull
 def get_hull_buffer(coords, alpha, buffersize):
